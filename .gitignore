@@ -1,0 +1,10 @@
+# common
+*.log
+.env
+/.idea
+/.vscode
+/node_modules
+/dist
+/target
+**/bin/
+.DS_Store
