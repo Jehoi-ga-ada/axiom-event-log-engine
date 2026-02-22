@@ -1,6 +1,7 @@
 use tokio::net::{TcpListener, UnixListener};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use crate::core::storage::LogStore;
+use crate::util::checksum;
 use std::fs;
 use tokio::sync::{mpsc, oneshot};
 use bytes::{BytesMut, Bytes};
@@ -12,10 +13,19 @@ pub struct LogBatch {
 
 pub async fn disk_worker(mut receiver: mpsc::Receiver<LogBatch>, mut store: Box<dyn LogStore>) {
     while let Some(batch) = receiver.recv().await {
+        let mut all_success = true;
         for data in &batch.messages {
-            let _ = store.append(data);
+            let crc = checksum::calculate(data);
+            
+            if let Err(_) = store.append_with_checksum(data, crc) {
+                all_success = false;
+                break;
+            }
         }
-        let _ = batch.ack_tx.send(());
+        
+        if all_success {
+            let _ = batch.ack_tx.send(());
+        }
     }
 }
 
