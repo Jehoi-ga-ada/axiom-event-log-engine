@@ -1,6 +1,7 @@
 mod core;
 mod domain;
 mod infra;
+mod util;
 
 use crate::infra::storage::mmap_handler::MmapStore;
 use crate::infra::network::tcp_uds::{TcpIngestServer, UdsIngestServer, disk_worker};
