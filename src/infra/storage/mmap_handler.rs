@@ -22,10 +22,12 @@ impl MmapStore {
 
         let mmap = unsafe { MmapMut::map_mut(&file)? };
 
+        let valid_ptr = crate::core::recovery::RecoveryManager::scan_and_repair(&mmap);
+
         Ok(Self {
             _file: file,
             mmap,
-            write_ptr: 0,
+            write_ptr: valid_ptr,
             capacity: size,
         })        
     }
